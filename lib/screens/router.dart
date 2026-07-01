@@ -5,6 +5,12 @@ import '../services/auth_provider.dart';
 import 'auth/login_screen.dart';
 import 'auth/forgot_password_screen.dart';
 
+import 'volunteer/volunteer_dashboard_screen.dart';
+import 'volunteer/volunteer_services_screen.dart';
+import 'volunteer/volunteer_sessions_screen.dart';
+import 'volunteer/volunteer_requests_screen.dart';
+import 'volunteer/volunteer_more_screen.dart';
+
 import 'shared/dashboard_screen.dart';
 import 'mum/logs/logs_screen.dart';
 import 'mum/logs/view_log_screen.dart';
@@ -54,9 +60,10 @@ final router = GoRouter(
     return null;
   },
   routes: [
-    // Splash
+    // ── Splash ────────────────────────────────────────────────────
     GoRoute(path: '/splash', builder: (_, __) => const _SplashScreen()),
-    // Auth
+
+    // ── Auth ──────────────────────────────────────────────────────
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(
         path: '/forgot-password',
@@ -64,28 +71,32 @@ final router = GoRouter(
     GoRoute(
         path: '/onboarding', builder: (_, __) => const MumOnboardingScreen()),
 
-    // Shell (bottom nav)
+    // ── Shell (bottom nav) ────────────────────────────────────────
     ShellRoute(
       builder: (context, state, child) {
         final location = state.matchedLocation;
         int idx = 0;
         final auth = context.read<AuthProvider>();
         final isMum = auth.isMum;
-        if (isMum) {
-          if (location.startsWith('/logs')) {
-            idx = 1;
-          } else if (location.startsWith('/education'))
-            idx = 2;
-          else if (location.startsWith('/forum'))
-            idx = 3;
-          else if (location.startsWith('/profile')) idx = 4;
+        final isVolunteer = auth.isVolunteer;
+
+        if (isVolunteer) {
+          // Home(0) | Services(1) | Consultation(2) | Request(3) | More(4)
+          if (location.startsWith('/volunteer/services'))      idx = 1;
+          else if (location.startsWith('/volunteer/sessions')) idx = 2;
+          else if (location.startsWith('/volunteer/requests')) idx = 3;
+          else if (location.startsWith('/volunteer/more'))     idx = 4;
+        } else if (isMum) {
+          if (location.startsWith('/logs'))           idx = 1;
+          else if (location.startsWith('/education')) idx = 2;
+          else if (location.startsWith('/forum'))     idx = 3;
+          else if (location.startsWith('/profile'))   idx = 4;
         } else {
-          if (location.startsWith('/education')) {
-            idx = 1;
-          } else if (location.startsWith('/forum'))
-            idx = 2;
+          if (location.startsWith('/education'))    idx = 1;
+          else if (location.startsWith('/forum'))   idx = 2;
           else if (location.startsWith('/profile')) idx = 3;
         }
+
         return AppShell(selectedIndex: idx, child: child);
       },
       routes: [
@@ -106,16 +117,38 @@ final router = GoRouter(
                   : const ProfileScreen();
             }),
         GoRoute(
-            path: '/education', builder: (_, __) => const EducationScreen()),
-        GoRoute(
-          path: '/logs',
-          builder: (_, __) => const LogsScreen(),
+          path: '/volunteer/services',
+          builder: (_, __) => const VolunteerServicesScreen(),
+          routes: [
+            // Sub-screens pushed on top — back arrow works automatically
+            GoRoute(
+              path: 'new',
+              builder: (_, __) => const ServiceFormScreen(mode: ServiceMode.create),
+            ),
+          ],
         ),
-        GoRoute(path: '/forum', builder: (_, __) => const ForumScreen()),
+        GoRoute(
+          path: '/volunteer/sessions',
+          builder: (_, __) => const VolunteerSessionsScreen(),
+          routes: [
+            GoRoute(
+              path: 'new',
+              builder: (_, __) => const NewVolunteerSessionScreen(),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: '/volunteer/requests',
+          builder: (_, __) => const VolunteerRequestsScreen(),
+        ),
+        GoRoute(
+          path: '/volunteer/more',
+          builder: (_, __) => const VolunteerMoreScreen(),
+        ),
       ],
     ),
 
-    // Detail screens (no shell)
+    // ── Detail screens (no shell) — unchanged from your original ──
     GoRoute(path: '/logs/create', builder: (_, __) => const CreateLogScreen()),
     GoRoute(
         path: '/logs/:id',
@@ -129,8 +162,9 @@ final router = GoRouter(
         path: '/profile/edit',
         builder: (context, state) =>
             EditProfileScreen(profile: state.extra as Map<String, dynamic>?)),
-    GoRoute(path: '/faq', builder: (_, __) => const FaqScreen()),
+    GoRoute(path: '/faq',     builder: (_, __) => const FaqScreen()),
     GoRoute(path: '/chatbot', builder: (_, __) => const ChatbotScreen()),
+
     GoRoute(
         path: '/consultation',
         builder: (_, __) => const ConsultationListScreen()),
@@ -140,6 +174,7 @@ final router = GoRouter(
     GoRoute(
         path: '/consultation/volunteers',
         builder: (_, __) => const VolunteersListScreen()),
+
     GoRoute(
         path: '/consultation/book',
         builder: (context, state) {
@@ -163,12 +198,12 @@ final router = GoRouter(
         path: '/consultation/detail',
         builder: (context, state) => ConsultationDetailScreen(
             consultation: state.extra as Map<String, dynamic>)),
-    GoRoute(
-        path: '/subscription', builder: (_, __) => const SubscriptionScreen()),
+    GoRoute(path: '/subscription', builder: (_, __) => const SubscriptionScreen()),
     GoRoute(
         path: '/education/:id',
         builder: (context, state) => ArticleDetailScreen(
             article: (state.extra as Map<String, dynamic>?) ?? {})),
+
     GoRoute(
         path: '/baby-development',
         builder: (_, __) => const BabyDevelopmentScreen()),
@@ -176,6 +211,7 @@ final router = GoRouter(
         path: '/milestone-journey',
         builder: (_, __) => const MilestoneJourneyScreen()),
     GoRoute(path: '/submit-link', builder: (_, __) => const SubmitLinkScreen()),
+
     GoRoute(
         path: '/specialist/edit-profile',
         builder: (context, state) => SpecialistEditProfileScreen(

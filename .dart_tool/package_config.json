@@ -4,12 +4,15 @@
     {
       "name": "app_links",
       "rootUri": "file:///C:/Users/cheri/AppData/Local/Pub/Cache/hosted/pub.dev/app_links-7.1.2",
+
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
     {
       "name": "app_links_linux",
+
       "rootUri": "file:///C:/Users/cheri/AppData/Local/Pub/Cache/hosted/pub.dev/app_links_linux-1.0.3",
+
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },
